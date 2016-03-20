@@ -22,7 +22,8 @@ import readlineSync from 'readline-sync';
  */
 
 export function Player(name, letter) {
-
+  this.name = name;
+  this.letter = letter;
 }
 
 /**
@@ -67,8 +68,18 @@ function drawBoard(state) {
  */
 
 export function emptySpotsLeft(state) {
-	// YOUR CODE HERE
+  var hasMoves = false;
+  for (var row = 0; row < state.length; row++){
+    for (var column = 0; column < state.length; column++) {
+      if (state[row][column] === " "){
+        hasMoves=true;
+      }
+    }
+  }
+  return hasMoves;
 }
+
+
 
 /**
  * We need a function to validate player moves.
@@ -91,8 +102,16 @@ export function emptySpotsLeft(state) {
  */
 
 export function validateMove(state, move) {
-  // YOUR CODE HERE
+  var isValidMove = false;
+  if (move.row >= 1 && move.row <= 3 &&
+    move.column >=1 && move.column <=3) {
+    if (state[move.row-1][move.column-1] === " "){
+      isValidMove = true;
+    }
+  }
+  return isValidMove;
 }
+
 /**
  * We need a function to ask a user for their move.
  * This is more complicated than the Guess a Number
@@ -125,12 +144,23 @@ export function validateMove(state, move) {
  */
 
 function getPlayerMove(state, player) {
-	// DISPLAY CURRENT PLAYER NAME AND LETTER
+    console.log("It's " + player.name + "'s turn to place the letter " + player.letter + ".");
+    var move = { row: "", column: "" };
+    //run at least once to get move
+    //continue runnin if invalid
+    do {
+        move.row = readlineSync.question(player.name + ", what row?");
+        move.column = readlineSync.question(player.name + ", what column?")
+        console.log("move is : " + move.row + " : " + move.column);
+        if (validateMove(state, move) === false) {
+            console.log("Invalid move. Try again, " + player.name + "...");
+        }
+    } while (!validateMove(move));
 
-  // ASK WHAT ROW THEY WANT
-
-  // ASK WHAT COLUMN THEY WANT
+    //if we reach here, move is valid
+    return move;
 }
+
 
 
 
@@ -159,11 +189,36 @@ function getPlayerMove(state, player) {
  */
 
 export function isGameWon(state) {
-  // CHECK FOR HORIZONTAL WINS ON EACH ROW
+    var isWon = false;
+    var winningLetter= " ";
+    for (var index = 0; index < state.length; index++) {
+        if (state[index][0] === state[index][1] &&
+           state[index][0] === state[index][2] &&
+            state[index][0] !== ' ') {
+            isWon = true;//Horizontal win
+            winningLetter = state[index][0];
 
-  // CHECK FOR VERTICAL WINS ON EACH COLUMN
+        }
+        if (state[0][index] === state[1][index] &&
+            state[0][index] === state[2][index] &&
+            state[0][index] !== ' ') {
+            isWon = true;//Vertical win
+            winningLetter= state[0][index];
 
-  // CHECK FOR DIAGONAL WINS
+        }
+    }
+    if (!isWon) {
+        if((state[0][0] === state[1][1] &&
+            state[0][0] === state[2][2]) &&
+            state[0][0] !== ' ' ||
+            (state[0][2] === state[1][1] &&
+            state[0][2] === state[2][0]) &&
+            state[0][2] !== ' '){
+            isWon=true;
+            winningLetter = state[1][1];
+        }
+    }
+    return winningLetter;
 }
 
 /**
@@ -204,37 +259,61 @@ export function isGameWon(state) {
  * while loop. If it isn't, let the loop keep going.
  */
 
-function runGame() {
-  // DISPLAY WELCOME BANNER
-
-  // ASK FOR PLAYER NAMES AND CREATE PLAYERS
-
-  // CREATE INITIAL GAME STATE
-  var gameBoard = [
-    [' ', ' ', ' '],
-    [' ', ' ', ' '],
-    [' ', ' ', ' '],
-  ];
-
-  // WHILE LOOP FOR WHEN GAME IS NOT WON
-
-    // DISPLAY BOARD
-
-    // GET MOVE FOR CURRENT PLAYER
-
-    // UPDATE gameBoard with new move
-
-    // CHECK FOR WIN CONDITION
-
-    // CHECK FOR MOVES LEFT
-
-    // UPDATE CURRENT PLAYER
-
-  // CONGRATULATE WINNER OR DECLARE IT A TIE
-}
-
-/**
- * Finally, we call our runGame function so that
- * the game actually starts.
- */
- runGame();
+// function runGame() {
+//   // DISPLAY WELCOME BANNER
+//   console.log("It's Tic-Tac-Toe!");
+//
+//   // ASK FOR PLAYER NAMES AND CREATE PLAYERS
+//     var players = [2];
+//     players[0] = new Player(readlineSync.question("First player, what is your name?"), "X");
+//     players[1] = new Player(readlineSync.question("Second player, what is your name?"), "O");
+//
+//     // CREATE INITIAL GAME STATE
+//     var gameBoard = [
+//       [' ', ' ', ' '],
+//       [' ', ' ', ' '],
+//       [' ', ' ', ' '],
+//     ];
+//
+//     var winningPlayer;
+//     // WHILE LOOP FOR WHEN GAME IS NOT WON
+//     while (isGameWon(gameBoard) !=="" && emptySpotsLeft(gameBoard)) {
+//
+//         // DISPLAY BOARD
+//         drawBoard(gameBoard);
+//
+//         // GET MOVE FOR CURRENT PLAYER
+//         // UPDATE CURRENT PLAYER
+//         for (var playerIndex = 0; playerIndex < players.length; playerIndex++) {
+//             if (emptySpotsLeft(gameBoard)) {
+//                var move = getPlayerMove(gameBoard, players[playerIndex]);
+//
+//                 // UPDATE gameBoard with new move
+//                 gameBoard[move.row][move.column] = players[playerIndex].letter;
+//
+//                 // CHECK FOR WIN CONDITION
+//                 if (isGameWon(gameBoard) !== "") {
+//                     winningPlayer = players[playerIndex];
+//                 }
+//                 // CHECK FOR MOVES LEFT
+//                 if (!emptySpotsLeft(gameBoard)) {
+//                     // break;
+//                 }
+//             }
+//         }
+//     }
+//     // CONGRATULATE WINNER OR DECLARE IT A TIE
+//     drawBoard(gameBoard);
+//     console.log("**GAME OVER**")
+//     if (winningPlayer !== undefined) {
+//         consol.log(winningPlayer.name + " has won!");
+//     } else {
+//         console.log("The game has ended in a tie.");
+//     }
+// }
+//
+// /**
+//  * Finally, we call our runGame function so that
+//  * the game actually starts.
+//  */
+//  runGame();
